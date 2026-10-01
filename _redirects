@@ -1,0 +1,5 @@
+# Netlify clean URLs: serve folder index.html for extensionless paths.
+/app/settings    /app/settings/index.html    200
+/app/settings/   /app/settings/index.html    200
+/app/*           /app/:splat                 200
+/*               /404.html                   404

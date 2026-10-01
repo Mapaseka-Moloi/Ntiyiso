@@ -1,0 +1,23 @@
+# Netlify configuration for Ntiyiso.
+# Clean URLs: /app/settings -> /app/settings/index.html
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/app/settings"
+  to = "/app/settings/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/app/settings/*"
+  to = "/app/settings/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/app/*"
+  to = "/app/:splat"
+  status = 200
+  force = true

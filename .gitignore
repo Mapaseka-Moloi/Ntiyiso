@@ -1,0 +1,7 @@
+# Slices produced by tools/extract.py. Regenerate with:
+#   python tools/extract.py
+build/extracted/
+
+node_modules/
+.DS_Store
+Thumbs.db
