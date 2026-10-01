@@ -1,10 +1,12 @@
-# Ntiyiso
+# Ntiyiso Scam Shield
 
-> **Stop the scam before the click.**
+> **Stop the scam before the click, and before the payment.**
 
-Ntiyiso ("truth" in Xitsonga) is an AI-powered mobile app that tells people, in seconds, whether a **link, message, voice note or video** is genuine or fake. It is built for ordinary and elderly users, and designed to keep pace with AI-driven fraud.
+Ntiyiso ("truth" in Xitsonga and Vhenda) is an AI-assisted scam checker for people who send and receive money. A customer pastes a suspicious message or link, or describes a payment they are about to make, and gets a plain verdict in seconds: **what looks risky, why, and what to do next.**
 
-**Status:** Hackathon prototype / pre-pilot. See [What works today](#what-works-today) for an honest view of what is built versus planned.
+Built for **WeThinkCode_ SheHacks, Challenge C: Scam Shield** (Mukuru customer problem). It is a responsive web app on top of a separate API, designed to work on a cheap phone and a weak signal.
+
+**Status:** Hackathon prototype. See [What works today](#what-works-today) for an honest view of what is built versus planned. All Mukuru account and transaction data in the demo is **simulated**; no Mukuru systems are accessed.
 
 ---
 
@@ -13,26 +15,30 @@ Ntiyiso ("truth" in Xitsonga) is an AI-powered mobile app that tells people, in 
 1. [The problem](#the-problem)
 2. [The solution](#the-solution)
 3. [How it works](#how-it-works)
-4. [Architecture](#architecture)
-5. [Tech stack](#tech-stack)
-6. [Repository structure](#repository-structure)
-7. [Getting started](#getting-started)
-8. [What works today](#what-works-today)
-9. [Roadmap](#roadmap)
-10. [Security and privacy](#security-and-privacy)
-11. [Limitations](#limitations)
-12. [Business model](#business-model)
-13. [Documentation](#documentation)
-14. [Sources](#sources)
-15. [Team and licence](#team-and-licence)
+4. [Designed to be heeded, not ignored](#designed-to-be-heeded-not-ignored)
+5. [Architecture](#architecture)
+6. [Tech stack](#tech-stack)
+7. [Repository structure](#repository-structure)
+8. [Getting started](#getting-started)
+9. [What works today](#what-works-today)
+10. [Demo script](#demo-script)
+11. [How this maps to the brief and judging criteria](#how-this-maps-to-the-brief-and-judging-criteria)
+12. [Key design decisions](#key-design-decisions)
+13. [Roadmap](#roadmap)
+14. [Security and privacy](#security-and-privacy)
+15. [Limitations](#limitations)
+16. [Business model](#business-model)
+17. [Documentation](#documentation)
+18. [Sources](#sources)
+19. [Team and licence](#team-and-licence)
 
 ---
 
 ## The problem
 
-Scammers can now clone a voice from a few seconds of audio, put a real face on a fake video, and send convincing messages to thousands of people at once. They rely on one thing above all: **panic**. The victim has seconds to decide, and the scammer is counting on a click, a reply or a payment before the victim thinks.
+**Meet Blessing.** She has just arrived in a new city and is looking for work. Scammers know it. Fake job offers, "verify your account" phishing and romance scams all land in her inbox, and they all rely on one thing: **panic and trust, at the wrong moment.** One misplaced payment can cost her a month's wages, money that was meant to be sent home.
 
-Picture an elderly relative (*mkhulu*) who receives a message saying an account is blocked or a prize is waiting, with a link. There is no easy way to tell if it is real, and nobody beside them to ask.
+The same tactics are now supercharged by AI: cloned voices, convincing fake messages sent to thousands of people at once. And Blessing is not alone. An elderly relative at home (*mkhulu*) faces the same messages with even less support. Neither has anyone beside them to ask.
 
 | Figure | Source |
 |---|---|
@@ -45,89 +51,102 @@ Picture an elderly relative (*mkhulu*) who receives a message saying an account 
 
 ## The solution
 
-A customer shares or pastes a suspicious item into Ntiyiso. The analysis runs **on our servers, never on the customer's phone**, and returns a simple verdict with plain-language reasons:
+Ntiyiso has three checks, all behind one verdict engine:
 
-- 🔴 **HIGH RISK**: do not click, do not reply
-- 🟠 **SUSPICIOUS**: do not act; check directly with your provider
-- 🟢 **LOOKS GENUINE**
-
-Ntiyiso has three layers:
-
-| Layer | Audience | What it does |
+| Check | The customer does | Ntiyiso returns |
 |---|---|---|
-| **Customer app** (our focus) | Everyday people, including elderly and non-technical users | Check a link, message, voice note or video and get a verdict in seconds |
-| **Business API** | Banks, money-transfer firms, call centres, carriers | Screen calls and media in real time, flag fakes, feed a fraud dashboard |
-| **Shared intelligence** | Both | Reported scams improve detection for everyone; patterns feed bank fraud teams |
+| **Check a message or link** | Pastes (or shares) a suspicious message or URL | Verdict, risk score, the red-flag phrases highlighted, plain reasons, next steps |
+| **Check before you send** | Enters who they are paying, how much, and why, *before* confirming | Verdict on the payment: new recipient, unusual amount, risky reason, plus a calm "pause" step if needed |
+| **Learn the scams** | Opens the library | Short guides to the common tricks (fake job fees, "verify your account", romance scams) with examples and what to do |
 
-Ntiyiso can run as a standalone app or as a **feature inside a partner's banking or money-transfer app**, so checking takes two taps from the moment a scam arrives.
+Every result is one of three verdicts:
+
+- 🔴 **HIGH RISK**: do not click, do not reply, do not pay
+- 🟠 **SUSPICIOUS**: do not act yet; check directly with the company or person
+- 🟢 **LOOKS GENUINE**: no warning signs found (never a guarantee)
+
+Users can also **report** a scam to a fraud queue, **warn a friend** with a ready-made message, and tap **"This looks wrong"** if we got it wrong.
 
 ## How it works
 
-1. **Something suspicious arrives** (WhatsApp, SMS, email, social media).
-2. **Share or paste it into Ntiyiso.** Long-press, tap Share, choose Ntiyiso. Or paste a link, or upload a voice note or video. No SMS-reading permission is needed.
-3. **Analysis runs in seconds.** Link, text, voice and video services run in parallel on the server.
-4. **A plain verdict with 2-3 reasons** (for example: lookalike domain, prize claim, asks for PIN).
-5. **Act:** report it, warn the family circle, or delete.
+1. **Something suspicious arrives** (WhatsApp, SMS, email, social media), or the customer is about to send money.
+2. **Paste it in, or describe the payment.** On Android, an installed web app can also be a share target (stretch goal). No SMS-reading permission is ever needed.
+3. **Analysis runs on the server in about a second.** Message, link and payment rules run together and are fused into one verdict.
+4. **A plain verdict with 2-3 reasons and one clear next step.** Red-flag phrases are highlighted in the message so the user can see *why*.
+5. **Act:** report, warn a friend, learn more, or pause the payment.
 
 ### What the app checks
 
 | Feature | What it looks for |
 |---|---|
-| **Link checker** | Real destination after shorteners, match against official domains, lookalikes (e.g. `fnb.com.secure-login.xyz`, swapped letters), reputation (Google Safe Browsing), domain age, certificate details |
-| **Message analyser** | Urgency, prizes, blocked-account threats, requests for PIN/OTP, bank or money-transfer impersonation, pressure phrases |
-| **Voice-note checker** | Signs that a voice is synthetic or cloned, using audio models trained on real and fake speech |
-| **Video checker** | Face-swap and AI-generated artefacts, lip-sync mismatch, frame-to-frame inconsistencies |
-| **Report and warn** | One-tap report to a fraud queue; ready-made warning for family and friends |
-| **Family circle** (optional) | A trusted relative is alerted when a high-risk item is checked |
+| **Message analyser** | Requests for PIN/OTP/password, upfront fees for a job or prize, "account blocked" threats, urgency, too-good-to-be-true job offers, pressure to move to a private chat, money requests from someone met online, untraceable payment methods, secrecy requests, impersonation of Mukuru, banks or government |
+| **Link checker** | Match against official domains, lookalikes and subdomain tricks (e.g. `fnb.com.secure-login.xyz`), IP-address links, suspicious domain endings, shorteners that hide the destination. Stretch: redirect resolution, domain age, Google Safe Browsing |
+| **Payment checker** | First-time recipient, amount far above the customer's usual, a *stated reason* that is a known scam pattern (paying a "fee" for a job, visa or prize; sending to someone never met), a send straight after checking a high-risk message, bursts of sends to new recipients |
+| **Scam library** | Known tricks with red flags, a worked example, and what to do |
 
-### Designed for people like mkhulu
+> **Not in the prototype:** voice-note and video deepfake detection. They are part of the longer vision (see [Roadmap](#roadmap)) but are deliberately out of scope for a 1.5 day build.
+
+## Designed to be heeded, not ignored
+
+The hard part of Scam Shield is catching real threats **without crying wolf**. Too many false alarms and people stop listening. Our approach:
+
+- **Corroboration, not single signals.** One weak signal (a new recipient, a bit of urgency) never produces a red warning. Red needs a *critical* signal (e.g. asks for your PIN, demands a fee for a job) or evidence from more than one category.
+- **Mitigators.** A message whose links are all on the official-domain allowlist, with no credential or fee request, is capped at low risk. A genuine "never share your PIN" notice is *not* flagged for mentioning a PIN.
+- **Graded warnings.** Amber is a gentle "check first", not an alarm. Red is reserved for strong evidence.
+- **Always explain.** Every verdict shows the top 2-3 reasons in plain language and highlights the exact phrases in the message.
+- **Always say what to do next.** One action, not a lecture.
+- **Calm tone.** Ntiyiso never blames the user.
+- **Measure it.** A labelled fixture set of scam *and* legitimate messages (including tricky legitimate ones) is run on every change, and we track false positives separately from missed scams.
+- **A way to push back.** "This looks wrong" feeds our false-positive count.
+
+Details are in [`docs/BACKEND.md`](docs/BACKEND.md#6-verdict-engine) and [`docs/FRONTEND.md`](docs/FRONTEND.md#5-verdict-screen-specification).
+
+### Designed for people under pressure
 
 - Large text and buttons; colour is always paired with an icon and words
-- Maximum **two taps** from receiving a scam to seeing a verdict
-- Local languages (isiZulu, Sesotho, Xitsonga, Afrikaans and more over time)
-- Voice read-out of the verdict
-- Calm wording; Ntiyiso never blames the user
+- One main action per screen; a verdict in as few taps as possible
+- English plus at least one local language pack (see [Limitations](#limitations)); voice read-out where the browser supports it
+- Small, fast pages for cheap phones; the scam library works offline
 
 ### The key metric: time to verdict
 
-Scammers win when the victim's urge to click is faster than the check. Our success metric is **seconds from receiving a suspicious item to getting a verdict**. We will measure it in the prototype.
+Scammers win when the urge to click or pay is faster than the check. Our success metric is **seconds from opening the app to seeing a verdict**, measured in the prototype without capturing message content.
 
 ## Architecture
 
 ```mermaid
-flowchart TD
-    A[Mobile app<br/>share · paste · upload] --> G[API gateway<br/>auth · rate limits · validation]
-    B[Business API<br/>call centres · carriers] --> G
-    G --> Q[Job queue<br/>media jobs]
-    G --> L[Link service]
-    G --> T[Text service]
-    Q --> V[Voice service]
-    Q --> W[Video service]
-    L --> E[Verdict engine]
-    T --> E
-    V --> E
-    W --> E
-    E --> DB[(PostgreSQL<br/>users · checks · reports)]
-    Q --> M[(Encrypted media store<br/>auto-deleted)]
-    E --> F[Fraud queue · threat intel · model registry]
+flowchart LR
+    subgraph Client
+      W[Responsive web app<br/>React · PWA]
+    end
+    W -- REST/JSON --> API[FastAPI<br/>validation · rate limit · demo user]
+    API --> TXT[Text rules<br/>multi-language patterns]
+    API --> LNK[Link analysis<br/>allowlist · lookalike · heuristics]
+    API --> TRX[Transaction rules<br/>new recipient · amount · purpose]
+    TXT --> VE[Verdict engine<br/>fusion · corroboration · mitigators]
+    LNK --> VE
+    TRX --> VE
+    VE --> R[Reasons and next steps<br/>per language]
+    VE --> DB[(SQLite<br/>checks · reports · history · demo data)]
+    API --> LIB[Scam library<br/>JSON content]
 ```
 
-**No single signal decides.** The verdict engine fuses link, text, voice and video scores plus context (for example, a "bank" message that links to a domain registered last week). When confidence is low, the app says *"Suspicious, do not act. Check directly with your provider"* rather than guessing.
+Frontend and backend are separate deployables that talk only through a documented REST API (OpenAPI generated by FastAPI). The full production vision (queues, GPU workers, voice and video services) is described in [`docs/BACKEND.md`](docs/BACKEND.md#18-beyond-the-prototype).
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
-| Mobile app | React Native (or Flutter) with native share-target modules for Android and iOS |
-| API | Python (FastAPI) or Node.js behind an API gateway |
-| Async jobs | Redis or RabbitMQ with Celery-style workers |
-| Link intelligence | Sandboxed fetcher, allowlist, lookalike algorithms, Google Safe Browsing, RDAP/WHOIS, TLS inspection |
-| ML models | PyTorch / ONNX; audio spoof detection (AASIST or RawNet2-style, trained on ASVspoof data); video forensics |
-| Data | PostgreSQL; encrypted S3-compatible storage with automatic deletion |
-| Infrastructure | Docker, then Kubernetes with autoscaling and a GPU pool |
-| Observability | Logging, metrics, drift and accuracy dashboards, model registry |
+| Layer | Choice | Why |
+|---|---|---|
+| Web app | React + TypeScript + Vite, installable as a PWA | Works on a phone browser; no app-store step; small bundle |
+| Styling | CSS variables / design tokens, mobile-first | Easy to align with Mukuru's look and feel; light and dark |
+| API | Python 3.11, FastAPI, Pydantic | Fast to build, typed schemas, auto-generated OpenAPI docs |
+| Detection | Rules engine with weighted signals (noisy-OR fusion). Stretch: small scikit-learn text classifier | Explainable, deterministic, fast, works offline |
+| Data | SQLite (SQLAlchemy), JSON files for patterns, allowlist and scam library | Zero setup; swap for PostgreSQL later |
+| Explanations | Deterministic reason templates per language. Stretch: optional LLM to simplify wording (never decides the verdict) | Demo works without any external service |
+| Tests | pytest (backend), Vitest + Testing Library (frontend), fixture set of scam and legitimate messages | Measures false positives, not just catches |
+| Dev and deploy | Docker Compose for local; any simple host for the demo | |
 
-> This is a recommended starting stack. Adjust it to what the team knows best; the architecture stays the same.
+> This is the chosen starting stack. If the team swaps a piece, the API contract in [`docs/BACKEND.md`](docs/BACKEND.md#7-api-reference) is what must stay stable.
 
 ## Repository structure
 
@@ -139,46 +158,55 @@ ntiyiso/
 ├── docs/
 │   ├── BACKEND.md
 │   └── FRONTEND.md
-├── backend/            # FastAPI app, analysis services, verdict engine
-├── mobile/             # React Native app
-├── ml/                 # Model training, evaluation, benchmarks
-├── infra/              # Docker, Kubernetes, CI/CD
+├── backend/            # FastAPI app, rules engine, verdict engine, data files
+├── frontend/           # React + TypeScript PWA
+├── ml/                 # (stretch) classifier training and evaluation notebooks
+├── docker-compose.yml
 └── .env.example
 ```
 
 ## Getting started
 
-> Commands below assume the recommended stack (FastAPI + React Native). Update paths and commands to match the repo.
+> Commands assume the stack above. Update paths and commands to match the repo.
 
 ### Prerequisites
 
 - Python 3.11+
 - Node.js 20+
-- Docker and Docker Compose
-- A Google Safe Browsing API key
-- Android Studio and/or Xcode for the mobile app
+- (Optional) Docker and Docker Compose
+- (Optional, stretch) a Google Safe Browsing API key. **No keys are needed for the core demo.**
 
 ### Run the backend
 
 ```bash
 cd backend
-cp .env.example .env            # add your API keys
-docker compose up -d redis postgres
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
+python -m app.seed              # loads the demo user, recipients, history and scam library
 uvicorn app.main:app --reload
 ```
 
-The API is then available at `http://localhost:8000` (interactive docs at `/docs`).
+The API is then at `http://localhost:8000/api/v1` (interactive docs at `http://localhost:8000/docs`).
 
-### Run the mobile app
+### Run the web app
 
 ```bash
-cd mobile
+cd frontend
 npm install
-npx react-native run-android    # or: run-ios
+cp .env.example .env            # VITE_API_BASE_URL=http://localhost:8000/api/v1
+npm run dev
 ```
 
-Point the app at your backend by setting `API_BASE_URL` in the mobile `.env`.
+Open the printed local URL on your computer, or on your phone via your machine's LAN address.
+
+### Run the tests and the fixture evaluation
+
+```bash
+cd backend && pytest
+python -m app.eval              # runs scam + legitimate fixtures, prints false-positive and miss counts
+cd ../frontend && npm test
+```
 
 See [`docs/BACKEND.md`](docs/BACKEND.md) and [`docs/FRONTEND.md`](docs/FRONTEND.md) for full setup and design details.
 
@@ -188,44 +216,106 @@ See [`docs/BACKEND.md`](docs/BACKEND.md) and [`docs/FRONTEND.md`](docs/FRONTEND.
 
 | Capability | Status |
 |---|---|
-| Link check endpoint (allowlist, lookalike, Safe Browsing) | ☐ Built / ☐ Planned |
-| Text check endpoint (scam-language rules) | ☐ Built / ☐ Planned |
-| Verdict engine | ☐ Built / ☐ Planned |
-| Mobile share target + paste screen + verdict screen | ☐ Built / ☐ Planned |
-| Voice detection with a pretrained model | ☐ Built / ☐ Planned |
-| Video detection | ☐ Planned |
-| Family circle | ☐ Planned |
-| Business dashboard | ☐ Planned |
+| Message check endpoint (scam-language rules, English) | ☐ Built / ☐ Planned |
+| Link analysis (allowlist, lookalike, heuristics) | ☐ Built / ☐ Planned |
+| Payment check endpoint (new recipient, unusual amount, risky purpose) | ☐ Built / ☐ Planned |
+| Verdict engine (fusion, corroboration rule, mitigators) | ☐ Built / ☐ Planned |
+| Web app: paste, checking, verdict screen with highlights | ☐ Built / ☐ Planned |
+| Web app: check-before-you-send flow | ☐ Built / ☐ Planned |
+| Scam library (list and detail) | ☐ Built / ☐ Planned |
+| History, report, "This looks wrong" | ☐ Built / ☐ Planned |
+| Second language pack (suggested: isiZulu or Shona) | ☐ Built / ☐ Planned |
+| Fixture evaluation script with false-positive count | ☐ Built / ☐ Planned |
+| Voice read-out of the verdict | ☐ Built / ☐ Planned |
+| PWA install, offline library, Android share target | ☐ Built / ☐ Planned |
+| Small ML classifier (stretch) | ☐ Built / ☐ Planned |
+| Redirect resolution, Safe Browsing, domain age (stretch) | ☐ Built / ☐ Planned |
+| Voice-note and video deepfake detection | ☐ Planned (post-hackathon) |
+| Family circle and business dashboard | ☐ Planned (post-hackathon) |
+
+## Demo script
+
+A suggested 5-7 minute flow. Keep it end-to-end and rehearse it.
+
+1. **The customer (30s).** Meet Blessing. One bad click or payment costs a month's wages.
+2. **Fake job offer (60s).** Paste a "job offer, pay a registration fee" message. Show HIGH RISK, the highlighted phrases, the reasons and the next step.
+3. **A genuine message (45s).** Paste a real-looking transaction confirmation that says "never share your PIN". Show LOOKS GENUINE. *This is the "no crying wolf" moment.*
+4. **Phishing link (45s).** Paste a "verify your account" message with a lookalike link. Show the domain as plain text, never tappable.
+5. **Check before you send (90s).** New recipient, large amount, reason "fee for a job". Show the pause step. Then change the reason to "family" and show how the verdict softens.
+6. **Learn the scams (30s).** Open a library entry; tap its example straight into the checker.
+7. **Language and accessibility (30s).** Switch language, use Listen.
+8. **How it works and what we learned (60s).** Show the "why this verdict" panel, the fixture results, and the design decisions below.
+
+## How this maps to the brief and judging criteria
+
+| Brief item | Where it lives |
+|---|---|
+| Detect suspicious messages or transactions | `/check/message`, `/check/link`, `/check/transaction` |
+| Show a clear warning and explain why | Verdict screen: banner, reasons, highlighted phrases |
+| Tell the user what to do next | `instruction` and `next_steps` on every result |
+| Rules-based or simple classifier | Weighted rules engine; optional small classifier |
+| Bonus: paste-a-message checker | Home screen, primary flow |
+| Bonus: risk score with plain-language reason | Risk meter plus `reason_text` |
+| Bonus: learn-the-scams library | Library screens and `/scams` |
+| Bonus: unusual transactions | Check-before-you-send flow |
+| Bonus: more than one language | i18n packs for UI and reasons |
+| Deliverables: prototype, API, responsive frontend, demo | This repository and the demo script |
+
+| Judging criterion | What we are showing |
+|---|---|
+| **Functionality (40%)** | Message, link and payment checks end to end, history, report, library |
+| **Creativity and UX (25%)** | Highlighted red-flag phrases, graded warnings, "pause" step, learn-from-example, voice read-out |
+| **Technical implementation (25%)** | Separate API and web app, typed contract, explainable engine, fixture-based evaluation |
+| **Presentation and teamwork (10%)** | Rehearsed demo; clear split of work (see the plan in [`docs/BACKEND.md`](docs/BACKEND.md#17-build-plan)) |
+
+## Key design decisions
+
+Be ready to explain these to the judges.
+
+| Decision | Reason |
+|---|---|
+| **Responsive web app (PWA), not a native app** | The brief asks for a web app that works on a phone; no install friction; one codebase |
+| **Rules first, ML optional** | Explainable, testable in a day, no training data needed; the brief accepts rules-based |
+| **Noisy-OR fusion of weighted signals** | Simple to explain: independent warning signs add up, but no single weak sign is enough |
+| **Corroboration rule and mitigators** | Directly attacks the false-alarm problem |
+| **Check the payment as well as the message** | The money moment is where the loss happens; the stated reason is the strongest signal we can get |
+| **Server-side analysis only** | Suspicious links are never opened or rendered on the phone |
+| **Fixtures include legitimate messages** | We report false positives, not just catches |
+| **Simulated Mukuru data** | We have no access to real accounts, and should not pretend to |
 
 ## Roadmap
 
 | Phase | What gets built |
 |---|---|
-| **1. Prototype** | Backend first: link and text endpoints, verdict engine. Then the mobile app: share target, paste screen, loading, verdict screen, history, report |
-| **2. Voice** | Voice-note upload, async job queue, pretrained synthetic-voice model, results screen, benchmarks on local voices |
-| **3. Video and family** | Video checks, family circle alerts, more languages, business dashboard on the same API |
-| **4. Launch readiness** | Security testing, POPIA review, pilot partner integration, monitoring and model-update pipeline |
+| **1. Hackathon prototype** | Message, link and payment checks; verdict engine; web app with verdict, library, history, report; one extra language; fixture evaluation |
+| **2. Hardening** | Redirect resolution and reputation lookups, small classifier, more languages, native-speaker review of all scam wording, appeal review queue |
+| **3. Media** | Voice-note and video checks with a job queue and pretrained detectors; benchmarks on local voices |
+| **4. Partners and scale** | Embeddable module inside a partner app, business API and dashboard, family circle, call-screening API, POPIA review, security testing |
 
 ## Security and privacy
 
 An anti-fraud app has to be the most trustworthy app on the phone.
 
-- **Suspicious links are never opened on the phone.** Only a sandboxed server fetches them, with timeouts, hop limits and SSRF protection.
-- **Suspicious links are never tappable.** Results show the domain as plain text.
-- **No SMS-reading permission.** The customer chooses what to share.
-- **Encrypted in transit and at rest.** Uploaded media is deleted automatically after analysis; only the verdict and non-identifying fingerprints are kept.
-- **POPIA compliance:** minimum data, clear explanations, consent for optional features, support for deletion requests.
-- **Abuse protection:** rate limits, authentication and probing detection so attackers cannot test fakes against the detector.
-- **Independent security testing** (penetration tests, code review) before launch, plus a vulnerability-reporting process.
+- **Suspicious links are never opened on the device.** Analysis is server-side. Link resolution, if enabled, runs in a guarded fetcher with timeouts, hop limits and SSRF protection.
+- **Suspicious links are never tappable.** Results show the domain as plain text, with no anchor element.
+- **No SMS-reading permission.** The customer chooses what to share. The clipboard is only read when the customer taps **Paste**.
+- **Minimum data.** The server stores a hash of each input, the verdict and reasons. The prototype also stores a short, masked excerpt so the customer's own history is readable; this can be switched off.
+- **Encrypted in transit.** TLS only outside local development.
+- **No content in logs or analytics.**
+- **POPIA mindset:** clear explanations, consent for optional features, deletion of a user's data on request.
+- **Abuse protection:** rate limits and input limits so the detector cannot be probed freely.
+- **Before any real launch:** independent penetration test, code review, and a vulnerability-reporting process.
 
 ## Limitations
 
-Ntiyiso is a **risk-scoring tool, not a guarantee**. It reduces risk and speeds up the decision; it does not replace verifying through an official channel for high-value actions.
+Ntiyiso is a **risk-scoring tool, not a guarantee**. It reduces risk and speeds up the decision; it does not replace verifying through an official channel before a high-value payment.
 
-- Detection is imperfect and AI keeps improving. We use an ensemble of signals and a continuous improvement loop (monitor new generators → red-team → retrain and benchmark → shadow-test and release → learn from reports).
-- Phones do not allow apps to screen live calls or read SMS freely. The customer app uses share, paste and upload; live call screening is delivered through the business API.
-- The prototype uses published research baselines. **We will publish benchmark results on a held-out test set before quoting any accuracy numbers.**
-- False alarms are possible; the app shows reasons and offers a way to appeal.
+- Detection is imperfect and scammers adapt. The prototype uses transparent rules and a small test set; **we will not quote accuracy figures** beyond what we measured on a held-out set, and we will say how small it is.
+- Our fixture messages are written or collected by the team and are **not representative of all scams**.
+- Phones do not let web apps read SMS or screen live calls. The customer app relies on paste, share and manual entry.
+- Payment checks use **simulated** history and recipients. A real deployment would need a partner integration.
+- Local-language wording must be reviewed by native speakers before real use. Language packs in the prototype are limited.
+- False alarms are possible; the app shows reasons and offers "This looks wrong".
 
 ## Business model
 
@@ -233,10 +323,10 @@ Customers are protected for free through their provider, and the provider pays. 
 
 | Payer | Model |
 |---|---|
-| Banks and money-transfer firms | Per-active-user licence or per check, plus onboarding |
+| Money-transfer firms and banks | Per-active-user licence or per check, plus onboarding |
 | Call centres and BPOs | Per call screened or per attack blocked, with volume tiers |
 | Mobile networks and carriers | Platform licence; per-message or per-call pricing at scale |
-| Consumers (later) | Free basic checks; optional premium (family circle, unlimited media checks) |
+| Consumers (later) | Free basic checks; optional premium features |
 
 Specific rand figures will be set with pilot partners once real volumes are known.
 
@@ -244,9 +334,9 @@ Specific rand figures will be set with pilot partners once real volumes are know
 
 | Document | Contents |
 |---|---|
-| [`docs/BACKEND.md`](docs/BACKEND.md) | Services, verdict engine, API reference, data model, security, deployment |
-| [`docs/FRONTEND.md`](docs/FRONTEND.md) | Screens, share-target setup, state, accessibility, i18n, testing |
-| Product brief (`Ntiyiso_Product_Brief.pdf`) | Problem, solution, business, scalability, judge Q&A |
+| [`docs/BACKEND.md`](docs/BACKEND.md) | Engine, signals and weights, verdict logic, API reference, data model, testing, build plan |
+| [`docs/FRONTEND.md`](docs/FRONTEND.md) | Screens, verdict and warning UX, state, accessibility, i18n, PWA, testing |
+| Product brief (`Ntiyiso_Product_Brief.pdf`) | Problem, solution, business, scalability, judge Q&A. **Update to match this README** |
 
 ## Sources
 
@@ -265,6 +355,11 @@ Full clickable links are in the product brief.
 
 ## Team and licence
 
-- **Team:** _add names and roles_
+- **Team:** 
+-Naledi Kutta
+-Mapaseka Moloi
+-Slindokuhle Zondo
+-Lindokuhle Sewela
 - **Contact:** _add email_
 - **Licence:** _choose a licence (e.g. MIT, Apache-2.0) or mark as proprietary_
+- Built for WeThinkCode_ SheHacks, Rosebank campus (Mukuru x WeThinkCode_).
