@@ -240,10 +240,17 @@ function mountScreen(name, params){
 function renderCustomer(){ mountScreen(currentScreen); }
 
 /* ══ auth ═══════════════════════════════════════════════════════════════
-   /auth/login and /auth/signup are two documents sharing one flow, so setAuthMode
-   only clears the note: the page itself is the mode. */
+   /auth/login and /auth/signup are two documents sharing one flow, so the page
+   itself is the mode. setAuthMode still has to make that mode's form visible:
+   the extracted markup ships #formSignup with class="hidden" because the
+   monolith used to toggle it, and a form that is on the page but has no area
+   on screen cannot be filled in. */
 function setAuthMode(mode){
   authMode = mode;
+  var mine = document.getElementById(mode === 'signup' ? 'formSignup' : 'formSignin');
+  var other = document.getElementById(mode === 'signup' ? 'formSignin' : 'formSignup');
+  if(mine) mine.classList.remove('hidden');
+  if(other) other.classList.add('hidden');
   var note = document.getElementById('authNote');
   if(note) note.innerHTML = '';
 }
@@ -528,6 +535,16 @@ $('staffCodeBlockIn').classList.toggle('hidden', role !== 'staff');""",
 var el = document.getElementById(id);
 if(el) el.classList.toggle('hidden', role !== 'staff');
 });"""),
+    # pickRole used to end by resetting the mode to "signin", which was right
+    # when both forms shared one page. Now it would hide #formSignup for good
+    # on /auth/signup, so the page is left as the mode is.
+    ("""if(hint) hint.innerHTML = 'Prototype code for this demo: <b class="mono">' + esc(CONFIG.staffCode) + '</b>';
+setAuthMode('signin');
+fillI18n(custRoot());
+}""",
+     """if(hint) hint.innerHTML = 'Prototype code for this demo: <b class="mono">' + esc(CONFIG.staffCode) + '</b>';
+fillI18n(custRoot());
+}"""),
     # ...and only one of the two forms is on the page, and only on /auth/*.
     # These were statements inside the monolith's boot(), so they are turned
     # into a function that wireAuthShell() calls. Left at the top level they

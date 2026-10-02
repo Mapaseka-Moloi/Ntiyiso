@@ -94,10 +94,15 @@ a.ghost,a.btn.ghost{color:var(--brand-ink)}""",
         """.tabs a{flex:1;background:none;border:0;padding:11px;font-size:.84em;
 font-weight:700;color:var(--muted);text-align:center;text-decoration:none}
 .tabs a[aria-current="page"]{background:var(--brand);color:#fff}""",
-        # assets/logo.png is a square mark, not the old 340x100 lockup, so the
-        # hero placement is sized by height and centred.
-        """.auth img.lockup{width:auto;height:58px;max-width:190px;object-fit:contain;
-margin-left:auto;margin-right:auto}""",
+        # assets/logo.png is the square shield, but the auth screen used to be
+        # headed by a 340x100 lockup that carried the wordmark too. The mark is
+        # therefore sized as a hero rather than shrunk to the width of the old
+        # wordmark, and the product name is set as text under it.
+        """.auth img.lockup{width:auto;height:clamp(104px,24vw,152px);max-width:min(76%,300px);
+object-fit:contain;margin-left:auto;margin-right:auto}
+.auth .wordmark{margin:-8px 0 22px;text-align:center;font-size:1.02em;font-weight:800;
+letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.auth .wordmark b{color:var(--brand);font-weight:800}""",
     ])
     for name in ("login", "signup"):
         write("auth/%s/styles.css" % name, [

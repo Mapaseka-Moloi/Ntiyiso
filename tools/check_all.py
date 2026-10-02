@@ -121,6 +121,13 @@ def main():
                   ["node", os.path.join(ROOT, "tools", "browser_check.mjs"), base], capture=False)
         ok &= run("the flows that cross documents still work",
                   ["node", os.path.join(ROOT, "tools", "flow_check.mjs"), base], capture=False)
+        # Last, because it drives the browser through every route and is the
+        # slowest of the four. It exists because the flow check above talks to
+        # elements by selector: a control that is on the page, wired up and
+        # display:none answers a synthetic event and passes. This asks whether
+        # anything has area on screen instead.
+        ok &= run("nothing a person needs is invisible",
+                  ["node", os.path.join(ROOT, "tools", "check_visible.mjs"), base], capture=False)
     finally:
         server.terminate()
         try:

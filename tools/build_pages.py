@@ -276,6 +276,20 @@ AUTH_TABS = """<div class="tabs" id="authTabs" aria-label="Sign in or create an 
 </div>"""
 
 
+def auth_head():
+    """The auth hero: the logo, plus the wordmark the old lockup carried.
+
+    `m_auth_head` pointed at a 340x100 inline SVG whose art was the shield plus
+    the words "mukuru NTIYISO". assets/logo.png is the shield alone, so without
+    this the sign-in screen shows a bare mark with no product name on it.
+    """
+    head = use_logo(cut("m_auth_head"))
+    head = substitute(
+        head, 'alt="mukurú NTIYISO" />',
+        'alt="" />\n<p class="wordmark">mukurú <b>NTIYISO</b></p>')
+    return head
+
+
 def auth_body(mode):
     form = cut("m_auth_signin") if mode == "signin" else cut("m_auth_signup")
     # The active mode is this page; the other one is a link.
@@ -286,7 +300,7 @@ def auth_body(mode):
     return title, "\n".join([
         '<div class="auth">',
         '<div class="auth-inner">',
-        use_logo(cut("m_auth_head")),
+        auth_head(),
         cut("m_auth_step1"),
         '<div id="authStep2" class="hidden">',
         cut("m_auth_step2"),

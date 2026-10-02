@@ -92,6 +92,31 @@ class Page {
       return 'ok';
     })()`);
   }
+  /* Does it have any area on screen?
+   *
+   * A form can be on the document, wired up and answer to a synthetic submit
+   * event while being invisible, which is a form nobody can fill in. Every
+   * assertion about a control being usable goes through here first.
+   */
+  async shown(sel) {
+    return this.eval(`(() => {
+      const el = document.querySelector(${JSON.stringify(sel)});
+      if (!el) return 'missing';
+      const b = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return 'display:none';
+      if (b.width < 2 || b.height < 2) return 'no area';
+      return 'ok';
+    })()`);
+  }
+  /* Click a form's submit button the way a person would. Programmatic clicks
+   * fire whether or not the control is on screen, so pair this with shown(). */
+  async submit(formSel, btnSel) {
+    const state = await this.shown(btnSel);
+    if (state !== 'ok') return `button ${btnSel}: ${state}`;
+    const clicked = await this.click(btnSel);
+    return clicked === 'ok' ? 'ok' : `button ${btnSel}: ${clicked}`;
+  }
 }
 
 async function newPage() {
@@ -132,15 +157,27 @@ try {
   check(atSignup === '/auth/signup', 'the sign-up page stays put', atSignup);
   check(await p.eval(`!!document.getElementById('formSignup')`),
     'the sign-up form is on the document');
+  check(await p.eval(`(() => {
+      const b = document.querySelector('img.lockup').getBoundingClientRect();
+      return Math.round(Math.min(b.width, b.height));
+    })() >= 100`),
+    'the logo is a hero, not an icon', await p.eval(
+      `(() => { const b = document.querySelector('img.lockup').getBoundingClientRect();
+         return Math.round(b.width) + 'x' + Math.round(b.height); })()`));
   const picked = await p.click('[data-role="customer"]');
   check(picked === 'ok', 'the role picker is on the document', picked);
   await sleep(300);
+  /* The form sits behind the role choice. It has to be visible on the far side
+   * of it, not merely present - that is what makes it fillable. */
+  check(await p.shown('#formSignup') === 'ok',
+    'the sign-up form is visible after picking a role', await p.shown('#formSignup'));
   await p.type('#suName', 'Thandi Mokoena');
   await p.type('#suPhone', '0821234567');
   await p.type('#suEmail', 'thandi@example.co.za');
   await p.type('#suPass', 'correct-horse');
-  await p.eval(`document.getElementById('formSignup')
-    .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))`);
+  const suBtn = await p.shown('#formSignup button[type="submit"]');
+  check(suBtn === 'ok', 'the Create account button is on screen', suBtn);
+  await p.submit('#formSignup', '#formSignup button[type="submit"]');
   await sleep(1200);
   check(await p.path === '/app/check', 'sign-up lands on /app/check', await p.path);
   check(
@@ -186,20 +223,47 @@ try {
     `JSON.parse(sessionStorage.getItem('ntiyiso.transient.v1') || 'null')?.current?.verdict || ''`);
   check(backToVerdict.length > 0, 'the last check is still reachable after navigating', backToVerdict);
 
-  /* ── 5. the fraud desk signs in and walks its rail ───────────────────── */
+  /* ── 5. signing out and signing back in again ───────────────────────── */
+  /* Sign-up alone would not catch a login form that cannot be filled in, so the
+   * round trip is walked: end the session, then sign in with the account made
+   * in step 1. */
+  await p.goto('/app/settings');
+  check(await p.shown('#custExit') === 'ok',
+    'the app bar offers a sign-out', await p.shown('#custExit'));
+  await p.click('#custExit');
+  await sleep(1200);
+  check(await p.path === '/auth/login', 'signing out returns to /auth/login', await p.path);
+  await p.click('[data-role="customer"]');
+  await sleep(300);
+  check(await p.shown('#formSignin') === 'ok',
+    'the sign-in form is visible after picking a role', await p.shown('#formSignin'));
+  await p.type('#siEmail', 'thandi@example.co.za');
+  await p.type('#siPass', 'correct-horse');
+  const siBtn = await p.shown('#formSignin button[type="submit"]');
+  check(siBtn === 'ok', 'the Sign in button is on screen', siBtn);
+  await p.submit('#formSignin', '#formSignin button[type="submit"]');
+  await sleep(1200);
+  check(await p.path === '/app/check', 'signing in lands on /app/check',
+    `${await p.path}${await p.eval(`document.getElementById('authNote')?.textContent || ''`)}`);
+
+  /* ── 6. the fraud desk signs in and walks its rail ───────────────────── */
   await p.goto('/desk/login');
+  check(await p.shown('.login-brand .mark img') === 'ok',
+    'the desk sign-in shows its brand', await p.shown('.login-brand .mark img'));
   await p.click('#deskAuthTabs button[data-auth="signup"]');
   await sleep(200);
   check(await p.eval(`document.getElementById('signupForm').style.display !== 'none'`),
     'the desk tabs swap to the sign-up form');
+  check(await p.shown('#signupForm') === 'ok',
+    'the desk sign-up form is visible once its tab is chosen', await p.shown('#signupForm'));
   await p.type('#signupName', 'Sibongile Dlamini');
   await p.type('#signupEmail', 'sibongile@mukuru.com');
   await p.type('#signupPass', 'desk-secret-1');
   await p.type('#signupPass2', 'desk-secret-1');
   const hasCode = await p.eval(`!!document.getElementById('staffCode')`);
   if (hasCode) await p.type('#staffCode', 'MUK-DESK-2026');
-  await p.eval(`document.getElementById('signupForm')
-    .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))`);
+  check(await p.submit('#signupForm', '#signupForm button[type="submit"]') === 'ok',
+    'the desk Create account button can be pressed');
   await sleep(1200);
   const deskNote = await p.eval(`document.getElementById('deskAuthNote')?.textContent || ''`);
   check(await p.path === '/desk/overview', 'desk sign-up lands on /desk/overview',
@@ -214,7 +278,7 @@ try {
   check((await p.eval(`document.querySelectorAll('main .view.on').length`)) === 1,
     'the live view is the one showing');
 
-  /* ── 6. no errors anywhere along the way ─────────────────────────────── */
+  /* ── 7. no errors anywhere along the way ─────────────────────────────── */
   check(p.errors.length === 0, 'no JavaScript errors during the flows', p.errors.join(' | '));
 } catch (err) {
   check(false, 'the run completed', err.message);

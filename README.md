@@ -235,11 +235,19 @@ python tools/check_all.py --rebuild    # regenerate from the monolith first
 This runs, in order: every `.js` file parses; the markup slices are cut where
 the builder expects; each page has unique ids, balanced tags and the right
 current tab; every route and asset resolves over HTTP; every page runs in a
-real browser without a JavaScript error; and the flows that cross documents —
-sign-up, running a check, walking the desk rail — still work.
+real browser without a JavaScript error; the flows that cross documents —
+sign-up, signing back in, running a check, walking the desk rail — still work;
+and nothing a person needs is invisible.
 
-The last two drive headless Chrome over the DevTools protocol, so they need
+The last three drive headless Chrome over the DevTools protocol, so they need
 Chrome or Edge on the machine and nothing installed.
+
+The visibility check earns its place. `flow_check.mjs` reaches controls by
+selector and fires events at them, which is how a form that was on the page,
+correctly wired and permanently `display:none` passed for months: it answered
+every synthetic event and no person could ever see it. `check_visible.mjs`
+measures rendered boxes instead, on both sides of the role picker, and reports
+what is doing the hiding.
 
 Individual checks, if you want just one:
 
@@ -249,12 +257,17 @@ python tools/check_pages.py      # page structure
 python tools/smoke.py http://localhost:5199
 node  tools/browser_check.mjs http://localhost:5199
 node  tools/flow_check.mjs   http://localhost:5199
+node  tools/check_visible.mjs http://localhost:5199
+node  tools/visible.mjs http://localhost:5199 /auth/signup none customer
 node  tools/diag_errors.mjs  http://localhost:5199 /app/check customer
 ```
 
 `diag_errors.mjs` takes a route and a seed (`none`, `customer`, `staff`) and
 prints the full stack of anything that throws, which is the quickest way to
-debug a page that comes up blank.
+debug a page that comes up blank. `visible.mjs` reports what one page actually
+shows — every image at its rendered size, and every control that is present but
+has no area on screen — with an optional fourth argument to click a role first,
+so you can see both sides of the picker.
 
 ### Deploying
 

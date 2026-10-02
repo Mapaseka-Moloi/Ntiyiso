@@ -1416,7 +1416,6 @@ if(el) el.classList.toggle('hidden', role !== 'staff');
 });
 var hint = $('staffCodeHint');
 if(hint) hint.innerHTML = 'Prototype code for this demo: <b class="mono">' + esc(CONFIG.staffCode) + '</b>';
-setAuthMode('signin');
 fillI18n(custRoot());
 }
 
@@ -1681,10 +1680,17 @@ function mountScreen(name, params){
 function renderCustomer(){ mountScreen(currentScreen); }
 
 /* ══ auth ═══════════════════════════════════════════════════════════════
-   /auth/login and /auth/signup are two documents sharing one flow, so setAuthMode
-   only clears the note: the page itself is the mode. */
+   /auth/login and /auth/signup are two documents sharing one flow, so the page
+   itself is the mode. setAuthMode still has to make that mode's form visible:
+   the extracted markup ships #formSignup with class="hidden" because the
+   monolith used to toggle it, and a form that is on the page but has no area
+   on screen cannot be filled in. */
 function setAuthMode(mode){
   authMode = mode;
+  var mine = document.getElementById(mode === 'signup' ? 'formSignup' : 'formSignin');
+  var other = document.getElementById(mode === 'signup' ? 'formSignin' : 'formSignup');
+  if(mine) mine.classList.remove('hidden');
+  if(other) other.classList.add('hidden');
   var note = document.getElementById('authNote');
   if(note) note.innerHTML = '';
 }
