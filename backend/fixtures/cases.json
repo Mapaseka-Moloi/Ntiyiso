@@ -1,0 +1,307 @@
+{
+  "$comment": [
+    "Labelled evaluation set for the verdict engine. Run by tools/eval_fixtures.py.",
+    "",
+    "expect:",
+    "  high_risk     - a scam, and the warning must be red",
+    "  suspicious    - worth pausing over, but not enough evidence for red",
+    "  looks_genuine - not a scam by this message alone",
+    "",
+    "label is what a careful human reviewer concluded about the message,",
+    "independent of what the engine produces. expect is the minimum verdict we",
+    "are willing to ship for that label.",
+    "",
+    "The genuine cases are the point of this file. A detector evaluated only on",
+    "scams looks perfect and warns about nothing, which is how people learn to",
+    "ignore it. Several genuine entries are deliberately hard: they mention PINs,",
+    "use urgency, or carry a lookalike-looking link, and must still come back",
+    "clean. Those are the entries that catch a regression."
+  ],
+  "version": "fixtures-1.0.0",
+  "message": [
+    {
+      "id": "scam-fee-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Registration fee demanded before work, with a plausible salary.",
+      "text": "Congratulations! You have been selected for a job at our company. Salary R25,000 per month, no interview needed, work from home. To secure your position you must pay a registration fee of R350 today. WhatsApp me on 082 000 0000 urgently."
+    },
+    {
+      "id": "scam-fee-02",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Processing fee for a loan, with a deadline.",
+      "text": "Dear customer, your loan of R45,000 has been approved. To release the funds you must pay a processing fee of R899 within 24 hours. After payment the money will be sent to your account immediately."
+    },
+    {
+      "id": "scam-pin-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Direct request for a PIN and OTP.",
+      "text": "Good day, this is Mukuru support. To verify your account, please send me your PIN and the OTP we just sent to your phone so we can confirm your identity."
+    },
+    {
+      "id": "scam-link-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Real brand name buried in a subdomain of an unrelated cheap domain.",
+      "text": "Your Mukuru transfer is on hold. Confirm your details here to release it: http://mukuru.com.release-funds.top/confirm"
+    },
+    {
+      "id": "scam-block-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Account-blocked panic plus a credential request on a lookalike domain.",
+      "text": "Dear valued customer, your Mukuru account will be suspended within 24 hours due to unusual activity. Verify your account now at http://mukuru-secure-verify.xyz/login or you will lose access to your funds."
+    },
+    {
+      "id": "scam-romance-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Emotional story plus an urgent money request and a secrecy request.",
+      "text": "My love, I am stuck at the hospital and they will not release me until the bill is paid. Please send money today, R4500, and do not tell your family yet, they will not understand. I will pay you back when I arrive."
+    },
+    {
+      "id": "scam-prize-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Unwanted prize with a release fee to claim it.",
+      "text": "Congratulations! Your number has won R50,000 in the Mukuru customer lucky draw. To claim your prize, pay a release fee of R250 and confirm your banking details today. Do not tell anyone or you may lose your winnings."
+    },
+    {
+      "id": "scam-ip-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Brand impersonation behind a raw IP address.",
+      "text": "FNB security alert: your card has been blocked. Confirm your details at http://197.82.14.7/fnb-verify to restore access immediately."
+    },
+    {
+      "id": "scam-giftcard-01",
+      "label": "scam",
+      "expect": "suspicious",
+      "why": "Untraceable payment method with an excuse, but no critical signal on its own.",
+      "text": "Hi, I need to settle an invoice. Can you send R1200 to my personal wallet instead? I will sort the paperwork through next week."
+    },
+    {
+      "id": "scam-whatsapp-01",
+      "label": "scam",
+      "expect": "suspicious",
+      "why": "Move to a private channel plus urgency. Weak on its own, which is the point.",
+      "text": "Are you still interested in the vacancy? Chat me on WhatsApp right now, the offer closes today and we need to fill it fast."
+    },
+
+    {
+      "id": "real-pin-notice-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "A genuine fraud warning that mentions a PIN. Negation guard must keep this clean.",
+      "text": "Mukuru will never ask for your PIN, your OTP or your banking password. If anyone contacts you asking for those details, it is a scam. Block the number and report it to us."
+    },
+    {
+      "id": "real-pin-notice-02",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Same trap, different wording.",
+      "text": "For your security: our agents do not need your card number or CVV to process a withdrawal. We will never ask you to share a one-time pin on a call."
+    },
+    {
+      "id": "real-confirmation-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Ordinary transfer confirmation from the real domain.",
+      "text": "Hi Thandi, your transfer of R850 to Tendai Moyo has been sent. It should be ready to collect within 30 minutes. You can track it in the app."
+    },
+    {
+      "id": "real-receipt-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Genuine payment receipt, including the official link.",
+      "text": "Payment successful. You paid R450 to Bright Hardware on 14 March. Reference BR-88213. View this receipt in your Mukuru app or at https://www.mukuru.com/transactions"
+    },
+    {
+      "id": "real-reminder-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "A genuine reminder uses urgency about a real obligation. Must not be flagged.",
+      "text": "Reminder: your SASSA grant payment of R320 will be available for collection from Friday. Please bring your ID to any Mukuru pay-out point. This notice is sent every month."
+    },
+    {
+      "id": "real-support-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Genuine support reply. Mentions 'support' near a brand name, which the impersonation rule must not over-fire on.",
+      "text": "Thanks for contacting Mukuru support. We have refunded the failed transfer of R1,200 and it should reflect in your account within two working days."
+    },
+    {
+      "id": "real-urgent-real-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Genuinely urgent message about the customer's own money. The hard case.",
+      "text": "Urgent: your transfer of R2,000 to Joseph Banda was declined by the receiving bank. Reply with the last four digits of the receiving account number so we can retry it today."
+    },
+    {
+      "id": "real-family-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "A relative asking to borrow money, with warmth. Nothing here is a scam pattern.",
+      "text": "How are you? I hope you are well. When you have a moment please can you send R600 towards my school fees, I will pay it back at the end of the month. Love you."
+    },
+    {
+      "id": "real-shortener-01",
+      "label": "suspect",
+      "expect": "suspicious",
+      "why": "A real short link. Labelled suspect rather than legitimate on purpose: we cannot resolve a shortener in this prototype, so amber — 'we cannot see where this goes' — is the honest answer, not clean.",
+      "text": "Here are the photos from the weekend: https://bit.ly/3xKm7pQ"
+    },
+    {
+      "id": "real-http-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "A real site still on http. NOT_HTTPS must not on its own create a red warning.",
+      "text": "The municipal water account statement is available at http://citycouncil.gov.za/statements"
+    }
+  ],
+  "link": [
+    {
+      "id": "link-lookalike-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Mukuru with hyphens on a cheap TLD.",
+      "url": "http://mukuru-secure-login.xyz/verify"
+    },
+    {
+      "id": "link-subdomain-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Official name as a subdomain of an unrelated domain.",
+      "url": "https://capitec.co.za.verify-account.click/login"
+    },
+    {
+      "id": "link-ip-01",
+      "label": "scam",
+      "expect": "suspicious",
+      "why": "A bare IP address link.",
+      "url": "http://197.82.14.7/verify"
+    },
+    {
+      "id": "link-shortener-01",
+      "label": "suspect",
+      "expect": "suspicious",
+      "why": "A shortener hides the destination. Not proof, but worth pausing on.",
+      "url": "https://bit.ly/3xKm7pQ"
+    },
+    {
+      "id": "link-real-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "The genuine Mukuru domain.",
+      "url": "https://www.mukuru.com/transactions"
+    },
+    {
+      "id": "link-real-02",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Genuine bank domain, www and all.",
+      "url": "https://www.fnb.co.za"
+    },
+    {
+      "id": "link-real-03",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Genuine government domain.",
+      "url": "https://www.sassa.gov.za"
+    },
+    {
+      "id": "link-punycode-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "Punycode homograph of a real brand.",
+      "url": "https://xn--mukuru-3we.com/verify"
+    }
+  ],
+  "transaction": [
+    {
+      "id": "pay-fee-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "The customer states it is a fee for a job. Strongest signal available.",
+      "payment": {"amount": 350, "currency": "ZAR", "purpose": "fee_for_job_or_visa",
+                  "new_recipient": {"name": "Bright Future HR", "country": "ZA"}}
+    },
+    {
+      "id": "pay-prize-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "A fee to release a prize.",
+      "payment": {"amount": 250, "currency": "ZAR", "purpose": "fee_to_claim_prize_or_loan",
+                  "new_recipient": {"name": "Claims Dept", "country": "ZA"}}
+    },
+    {
+      "id": "pay-unmet-01",
+      "label": "suspect",
+      "expect": "high_risk",
+      "why": "Sending to someone never met, combined with an amount above the median.",
+      "payment": {"amount": 4500, "currency": "ZAR", "purpose": "someone_met_online",
+                  "new_recipient": {"name": "Ana Ferreira", "country": "MZ"}}
+    },
+    {
+      "id": "pay-after-warning-01",
+      "label": "scam",
+      "expect": "suspicious",
+      "why": "A high-risk check moments before a normal-looking payment is the scam path.",
+      "context_last_risky_check": "10 minutes ago",
+      "payment": {"amount": 900, "currency": "ZAR", "purpose": "family",
+                  "recipient_id": "rcp_02"}
+    },
+    {
+      "id": "pay-rapid-01",
+      "label": "scam",
+      "expect": "suspicious",
+      "why": "Burst of sends to unsaved recipients inside the hour.",
+      "context_extra_new_sends": 3,
+      "payment": {"amount": 600, "currency": "ZAR", "purpose": "other",
+                  "new_recipient": {"name": "Unknown 4", "country": "ZA"}}
+    },
+    {
+      "id": "pay-normal-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "An ordinary monthly transfer to a saved recipient.",
+      "payment": {"amount": 850, "currency": "ZAR", "purpose": "family",
+                  "recipient_id": "rcp_01"}
+    },
+    {
+      "id": "pay-bills-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "Bills and airtime, saved recipient, ordinary amount.",
+      "payment": {"amount": 350, "currency": "ZAR", "purpose": "bills",
+                  "recipient_id": "rcp_03"}
+    },
+    {
+      "id": "pay-new-normal-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "A new recipient is a weak signal alone. This must not read red.",
+      "payment": {"amount": 500, "currency": "ZAR", "purpose": "buying_goods",
+                  "new_recipient": {"name": "Siyanda Furniture", "country": "ZA"}}
+    },
+    {
+      "id": "pay-school-01",
+      "label": "legitimate",
+      "expect": "looks_genuine",
+      "why": "School fees to a saved recipient.",
+      "payment": {"amount": 1200, "currency": "ZAR", "purpose": "school_or_rent",
+                  "recipient_id": "rcp_02"}
+    },
+    {
+      "id": "pay-note-scam-01",
+      "label": "scam",
+      "expect": "high_risk",
+      "why": "The note field carries the scam sentence, even though the purpose looks ordinary.",
+      "payment": {"amount": 700, "currency": "ZAR", "purpose": "buying_goods",
+                  "new_recipient": {"name": "Lerato Stores", "country": "ZA"},
+                  "note": "Please note this is the processing fee for the job, pay it today only."}
+    }
+  ]
+}

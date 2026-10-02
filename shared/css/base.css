@@ -1,0 +1,20 @@
+/* ══════════════════════════════════════════════════════════════════
+   NTIYISO · BASE SHELL
+   Loaded by every page. Contains only unscoped document-level rules.
+   Feature styles live in <feature>/styles.css; palettes live in
+   shared/css/customer.css and shared/css/desk.css.
+   ══════════════════════════════════════════════════════════════════ */
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:#FFFFFF}
+
+/* Each page owns exactly one app root. Kept for parity with the merged
+   build, where both roots coexisted in a single document. */
+#customerRoot,#deskRoot{width:100%}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+  transition-duration:.01ms !important;scroll-behavior:auto !important}
+}

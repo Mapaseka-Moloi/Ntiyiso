@@ -178,7 +178,6 @@ def check_url(raw):
         "verdict": verdict,
         "reasons": reasons
     }
-    
 if __name__ == "__main__":
     # Fixed argument logic: Fall back to a test address if no explicit argument parameter is passed
     if len(sys.argv) > 1:

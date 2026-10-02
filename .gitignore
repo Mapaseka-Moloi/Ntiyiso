@@ -1,0 +1,22 @@
+# Slices produced by tools/extract.py. Regenerate with:
+#   python tools/extract.py
+build/extracted/
+
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Python bytecode. The API is optional and importable without installing
+# anything, so these appear for anyone who has run the checks. Five .pyc files
+# were committed by accident at one point; they are machine- and
+# version-specific, so they cause conflicts between developers and mean nothing
+# on anyone else's machine.
+__pycache__/
+*.pyc
+
+# The API's SQLite file, created on first run. tools/check_all.py writes its
+# copies to the system temp directory so they never land in the repository.
+.data/
+*.db
+*.db-wal
+*.db-shm
