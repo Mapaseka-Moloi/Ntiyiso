@@ -4,181 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Ntiyiso Shield — WhatsApp</title>
+    <link href="css/whatsapp.css" rel="stylesheet" />
+
+    <title>Mukuru — Scam Shield</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        /* =====================================================
+           MENU / NUMBER NAVIGATION
+        ===================================================== */
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .phone {
-            width: 390px;
-            height: 750px;
-            background: #efeae2;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* WhatsApp header */
-
-        .header {
-            background: #075e54;
-            color: white;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .back {
-            font-size: 22px;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            background: #f58220;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .header-info {
-            flex: 1;
-        }
-
-        .header-info strong {
-            display: block;
-        }
-
-        .header-info small {
-            opacity: 0.8;
-        }
-
-        /* Chat */
-
-        .chat {
-            flex: 1;
-            padding: 20px 12px;
-            overflow-y: auto;
-            background:
-                radial-gradient(#d7d0c5 1px, transparent 1px);
-            background-size: 15px 15px;
-        }
-
-        .message {
-            max-width: 82%;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            line-height: 1.4;
-            font-size: 14px;
-        }
-
-        .incoming {
-            background: white;
-            margin-right: auto;
-        }
-
-        .outgoing {
-            background: #d9fdd3;
-            margin-left: auto;
-        }
-
-        .time {
-            font-size: 10px;
-            color: #777;
-            text-align: right;
-            margin-top: 5px;
-        }
-
-        /* Scam Shield result */
-
-        .shield {
-            background: #fff;
-            border-radius: 10px;
-            padding: 14px;
-            margin-top: 8px;
-            border-left: 5px solid #f58220;
-        }
-
-        .shield-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .risk-high {
-            color: #d93025;
-            font-weight: bold;
-        }
-
-        .risk-medium {
-            color: #d99000;
-            font-weight: bold;
-        }
-
-        .risk-low {
-            color: #188038;
-            font-weight: bold;
-        }
-
-        .reason {
-            margin: 5px 0;
-        }
-
-        .action {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-        }
-
-        /* Input */
-
-        .input-area {
-            background: #f0f0f0;
-            padding: 10px;
-            display: flex;
-            gap: 8px;
-        }
-
-        #messageInput {
-            flex: 1;
-            border: none;
-            border-radius: 20px;
-            padding: 12px 15px;
-            outline: none;
-            font-size: 14px;
-        }
-
-        #sendButton {
-            width: 45px;
-            height: 45px;
-            border: none;
-            border-radius: 50%;
-            background: #075e54;
-            color: white;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        #sendButton:hover {
-            background: #064e46;
-        }
+        
     </style>
 </head>
 
@@ -186,233 +21,81 @@
 
 <div class="phone">
 
-    <!-- WhatsApp header -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <div class="header">
 
         <div class="back">‹</div>
 
         <div class="avatar">
-            S
+            <img src="image/mukuru.png" alt="Mukuru">
         </div>
 
         <div class="header-info">
-            <strong>Scam Shield</strong>
+            <strong>Mukuru</strong>
             <small>online</small>
         </div>
 
     </div>
 
 
-    <!-- Chat area -->
+    <!-- =====================================================
+         CHAT
+    ====================================================== -->
 
     <div class="chat" id="chat">
 
-        <div class="message incoming">
+        <!--<div class="message incoming">
 
-            🛡️ <strong>Scam Shield</strong>
+            👋 <strong>Welcome to Mukuru</strong>
 
             <br><br>
 
-            Hi! Forward or type a suspicious message here and I'll check it for scam indicators.
+            How can we help keep you safe?
 
-            <div class="time">
-                now
+            <div class="menu-options">
+                <div>1. 🛡️ Scam Shield</div>
+                <div>2. 🧠 Fraud Prevention Tips</div>
             </div>
 
-        </div>
+            <div class="number-hint">
+                Reply with the number of your choice.
+            </div>
+
+            <div class="time">now</div>
+        </div>-->
 
     </div>
 
 
-    <!-- Message input -->
+    <!-- =====================================================
+         INPUT
+    ====================================================== -->
 
     <div class="input-area">
 
         <input
             type="text"
             id="messageInput"
-            placeholder="Type a suspicious message..."
+            placeholder="Reply with a number..."
+            autocomplete="off"
         >
 
-        <button id="sendButton">
-            ➤
-        </button>
+        <button id="sendButton">➤</button>
 
     </div>
 
 </div>
 
-
+<script src="src/whatsapp.js"></script>
 <script>
-
-const input = document.getElementById("messageInput");
-const sendButton = document.getElementById("sendButton");
-const chat = document.getElementById("chat");
-
-
-function addMessage(text, type) {
-
-    const message = document.createElement("div");
-
-    message.className = `message ${type}`;
-
-    message.innerHTML = `
-        ${text}
-        <div class="time">now</div>
-    `;
-
-    chat.appendChild(message);
-
-    chat.scrollTop = chat.scrollHeight;
-}
-
-
-async function checkMessage() {
-
-    const message = input.value.trim();
-
-    if (!message) {
-        return;
-    }
-
-    // Show customer's message
-
-    addMessage(message, "outgoing");
-
-    input.value = "";
-
-    // Temporary "checking" message
-
-    const checking = document.createElement("div");
-
-    checking.className = "message incoming";
-
-    checking.id = "checking";
-
-    checking.innerHTML = `
-        🛡️ Checking this message...
-    `;
-
-    chat.appendChild(checking);
-
-    chat.scrollTop = chat.scrollHeight;
-
-
-    try {
-
-        const response = await fetch(
-            "http://127.0.0.1:8000/check-message",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    message: message
-                })
-            }
-        );
-
-
-        const data = await response.json();
-
-        document.getElementById("checking").remove();
-
-        displayResult(data);
-
-    } catch (error) {
-
-        document.getElementById("checking").remove();
-
-        addMessage(
-            "⚠️ I couldn't connect to Scam Shield. Make sure the backend is running.",
-            "incoming"
-        );
-
-        console.error(error);
-    }
-}
-
-
-function displayResult(data) {
-
-    const risk = data.risk;
-
-    let riskClass = "risk-low";
-
-    if (risk.risk_level === "HIGH") {
-        riskClass = "risk-high";
-    }
-
-    else if (risk.risk_level === "MEDIUM") {
-        riskClass = "risk-medium";
-    }
-
-
-    let reasonsHTML = "";
-
-    risk.reasons.forEach(reason => {
-
-        reasonsHTML += `
-            <div class="reason">
-                • ${reason}
-            </div>
-        `;
-
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof showMainMenu === "function") {
+            showMainMenu();
+        }
     });
-
-
-    const resultHTML = `
-
-        <div class="shield">
-
-            <div class="shield-title">
-                🛡️ Scam Shield Analysis
-            </div>
-
-            <div class="${riskClass}">
-                ${risk.risk_level} RISK — ${risk.risk_score}/100
-            </div>
-
-            <br>
-
-            <strong>Why?</strong>
-
-            ${reasonsHTML || "<div class='reason'>No major scam indicators detected.</div>"}
-
-            <div class="action">
-
-                <strong>What should you do?</strong>
-
-                <br>
-
-                ${risk.recommended_action}
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    addMessage(resultHTML, "incoming");
-}
-
-
-sendButton.addEventListener("click", checkMessage);
-
-
-input.addEventListener("keypress", function(event) {
-
-    if (event.key === "Enter") {
-        checkMessage();
-    }
-
-});
-
 </script>
 
 </body>
