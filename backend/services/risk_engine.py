@@ -31,32 +31,51 @@ LEVELS = {
 
 
 def calculate_risk(message_analysis, url_analysis=None, deepfake_analysis=None):
-    """Combine the passes into one graded risk. Returns the keys it always has.
+    parts = [message_analysis or {}, url_analysis or {}, deepfake_analysis or {}]
 
-    `deepfake_analysis` is accepted and ignored. Voice and video detection is not
-    built; it is here because the signature has carried it since the shield was
-    first committed, and removing a parameter would break a caller for no gain.
-    """
-    signals = []
-    for analysis in (message_analysis, url_analysis, deepfake_analysis):
-        signals.extend(rebuild(analysis))
+    score = min(sum(p.get("score", 0) for p in parts), 100)
 
-    fusion = decide(signals)
-    verdict = fusion["verdict"]
+    reasons = []
+    for p in parts:
+        reasons.extend(p.get("reasons", []))
 
-    # Reasons come from the signals actually used, not from whatever text a
-    # caller passed in, so the explanation always matches the number above it.
-    from ._shared import sentences
-    reasons = sentences(fusion["unique"])
+    if score >= 60:
+        level = "HIGH"
+
+        warning = (
+            "This message may be a scam. "
+            "It contains several warning signs that could put your money "
+            "or personal information at risk."
+        )
+
+        action = (
+            "Do not reply, click links or send money. Contact Mukuru yourself through "
+            "the official app or the number on their website, then block and report the sender."
+        )
+    elif score >= 30:
+        level = "MEDIUM"
+
+        warning = (
+            "This message may be a scam. "
+            "It contains suspicious signs that should be verified "
+            "before you take any action."
+        )
+
+        action = "Be careful. Verify with Mukuru through official channels before doing anything."
+    else:
+        level = "LOW"
+
+        warning = (
+            "No major scam indicators were detected, "
+            "but always be careful with unexpected messages."
+        )
+
+        action = "No major scam signs found, but never share your PIN or send money you're unsure about."
 
     return {
-        "risk_level": LEVELS[verdict],
-        "risk_score": round(fusion["score"] * 100),
-        "reasons": reasons,
-        "recommended_action": instruction_for(verdict, "message", "en"),
-        # Additive. The page above ignores all of it; it is here so a caller that
-        # wants the graded score can also see what produced it.
-        "verdict": verdict,
-        "corroboration_met": fusion["corroboration_met"],
-        "mitigators_applied": fusion["mitigators"],
-    }
+    "risk_score": score,
+    "risk_level": level,
+    "warning": warning,
+    "reasons": reasons,
+    "recommended_action": action
+}
