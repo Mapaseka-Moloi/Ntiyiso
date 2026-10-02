@@ -1,0 +1,27 @@
+# The API runs with nothing installed.
+#
+#   python -m backend --standalone
+#
+# That path uses only the standard library, so a judge can clone the repo and
+# have a working API without pip, a virtualenv or a lockfile. The three packages
+# below are what the faster, better-documented server needs:
+#
+#   pip install -r requirements.txt      # from the repository root
+#   python -m backend
+#
+# Both serve the same routes, the same bodies and the same errors, which
+# tools/check_all.py verifies by running the identical contract check against
+# each. Nothing else in the project needs installing.
+#
+# This file and ../requirements.txt carry the same list. It exists because the
+# API was built by two people at once and each of them put one next to their own
+# entry point; leaving two would guarantee they drift. Edit the root one, then
+# copy it here.
+#
+# Lower bounds rather than exact pins: this is a prototype that has to run on a
+# laptop, a judge's laptop and a Raspberry Pi, and an exact pin is the thing
+# most likely to break one of those three.
+
+fastapi>=0.110
+uvicorn>=0.27
+pydantic>=2.6

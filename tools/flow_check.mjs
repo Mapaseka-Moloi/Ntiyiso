@@ -70,7 +70,27 @@ class Page {
   async goto(path) {
     this.errors = [];
     await this.send('Page.navigate', { url: BASE + path });
-    await sleep(1200);
+    /* Wait for the document rather than guessing with a sleep. Every page now
+     * registers a service worker on load, and this check runs alongside three
+     * other browser scripts, so a fixed 1200ms is a race that wins on an idle
+     * laptop and loses under load - and when it loses, the field below is simply
+     * not in the DOM yet and the flow is reported as broken. */
+    const deadline = Date.now() + 15000;
+    while (Date.now() < deadline) {
+      try {
+        if (await this.eval('document.readyState') === 'complete') return;
+      } catch { /* mid-navigation */ }
+      await sleep(100);
+    }
+  }
+  /* Wait for a condition rather than assuming the page got there. */
+  async waitFor(expression, timeoutMs = 5000) {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      try { if (await this.eval(expression)) return true; } catch { /* mid-navigation */ }
+      if (Date.now() > deadline) return false;
+      await sleep(100);
+    }
   }
   get path() { return this.eval('location.pathname'); }
   /* Set a field the way a person would, so the real submit handler runs. */

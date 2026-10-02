@@ -20,6 +20,10 @@ ROUTES = [
     "/app/verdict", "/app/history", "/app/settings", "/app/scam",
     "/desk/login", "/desk/overview", "/desk/live", "/desk/radar",
     "/desk/business", "/desk/case",
+    # The WhatsApp shield page. Hand-written rather than generated, and it is
+    # the one page that talks to the API instead of the browser engine, so it is
+    # the one that rots the quietest way when a route changes.
+    "/whatsapp.html",
 ]
 
 REF = re.compile(r'(?:href|src)="([^"]+)"')

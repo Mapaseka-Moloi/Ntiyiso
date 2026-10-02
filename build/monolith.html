@@ -2061,9 +2061,9 @@ maxTextChars:4000,
 staffCode:'MUK-DESK-2026'
 };
 var RULES = {
-high:0.75, suspicious:0.40, corroborationCap:0.74, allowlistCap:0.30,
+high:0.75, suspicious:0.40, corroborationCap:0.74, allowlistCap:0.30, mentionOnlyCap:0.30, corroborationCount:3, corroborationWeight:0.30,
 unusualAmountMultiplier:3, newUserAmountFloor:2000, coolingOffSeconds:600,
-version:'rules-1.0.0'
+version:'rules-1.0.1'
 };
 var ALLOWLIST = [
 ['Mukuru','mukuru.com'], ['Mukuru','mukuru.co.za'],
@@ -2330,7 +2330,7 @@ IP_ADDRESS_URL:'The link goes to a number address, not to a company website.',
 NEWLY_REGISTERED_DOMAIN:'This website was registered very recently.',
 KEYWORD_STUFFING:'The address is padded with words like "secure", "login" or "verify" that real companies do not use.',
 SUSPICIOUS_TLD:'Addresses ending like this are cheap and are often used for scams.',
-URL_SHORTENER:'The real address is hidden behind a short link.',
+URL_SHORTENER:'The real address is hidden behind a short link, so we cannot see where it goes. Check it another way before you trust it.',
 NOT_HTTPS:'This website does not use a secure connection.',
 SAFE_BROWSING_HIT:'This link has been reported as unsafe.',
 RISKY_PURPOSE_FEE:'You said this is a fee for a job, a visa or a prize. Those fees are the scam.',
@@ -2379,10 +2379,10 @@ re:/\b(?:send|share|give|confirm|enter|provide|reply with|tell me)\s+(?:me\s+)?(
 re:/\b(?:registration|processing|admin|application|clearance|release|handling|customs|training|uniform|activation)\s+fee\b|\bpay\s+(?:a\s+)?(?:small\s+)?(?:fee|deposit)\b|\bfee\s+to\s+(?:start|begin|secure|release|claim|get)\b/gi },
 { code:'ACCOUNT_THREAT', weight:.50, critical:false,
 re:/\b(?:account|profile|card|sim)\s+(?:will\s+be|has\s+been|is)\s+(?:blocked|suspended|closed|frozen|deactivated)\b|\b(?:verify|confirm|update)\s+(?:your\s+)?(?:account|details|information)\s+(?:now|immediately|within)\b|\blose\s+access\b/gi },
-{ code:'ROMANCE_MONEY_REQUEST', weight:.60, critical:false,
+{ code:'ROMANCE_MONEY_REQUEST', weight:.60, critical:true,
 re:/\b(?:i\s+love\s+you|my\s+(?:dear|love|darling))\b[\s\S]{0,120}\b(?:money|send|cash|help\s+me\s+pay)\b|\b(?:hospital|emergency|visa|ticket|clearance)\b[\s\S]{0,60}\b(?:send|need)\b[\s\S]{0,20}\bmoney\b/gi },
 { code:'UNTRACEABLE_PAYMENT', weight:.50, critical:false,
-re:/\b(?:gift\s+cards?|itunes\s+cards?|google\s+play\s+cards?|bitcoin|crypto|usdt|btc)\b|\bsend\s+(?:it\s+)?to\s+(?:my\s+)?(?:personal\s+)?(?:wallet|number)\b/gi },
+re:/\b(?:gift\s+cards?|itunes\s+cards?|google\s+play\s+cards?|bitcoin|crypto|usdt|btc)\b|\bsend\s+(?:it\s+)?(?:r\s?\d[\d\s,.]*\s+)?to\s+(?:my\s+)?(?:personal\s+)?(?:wallet|number)\b/gi },
 { code:'BRAND_IMPERSONATION', weight:.45, critical:false,
 re:/\b(?:mukuru|capitec|fnb|first\s+national|standard\s+bank|absa|nedbank|tymebank|sassa|sars|home\s+affairs|saps|paypal)\b[\s\S]{0,40}\b(?:team|support|security|department|official|helpdesk)\b/gi },
 { code:'SECRECY', weight:.40, critical:false,
@@ -2439,7 +2439,7 @@ var url; try{ url = new URL(href); }catch(e){ return null; }
 var host = url.hostname.toLowerCase(), labels = host.split('.');
 var registrable = labels.slice(-2).join('.');
 var official = null;
-ALLOWLIST.forEach(function(a){ if(a[1] === registrable) official = a[0]; });
+ALLOWLIST.forEach(function(a){ if(host === a[1] || (host.length > a[1].length && host.slice(-(a[1].length+1)) === '.' + a[1])) official = a[0]; });
 var impersonated = null;
 if(!official){
 var squashed = host.replace(/[^a-z0-9]/g, '');
@@ -2466,13 +2466,13 @@ function add(code, weight, critical){
 signals.push({ code:code, category:'link', weight:weight, critical:!!critical,
 evidence:f.host, span:null });
 }
-if(f.impersonatedBrand && f.subdomainTrick) add('SUBDOMAIN_TRICK', .70, true);
-else if(f.impersonatedBrand) add('LOOKALIKE_DOMAIN', .70, true);
-if(f.punycode) add('LOOKALIKE_DOMAIN', .70, true);
+var w = f.punycode ? .80 : .70;
+if(f.impersonatedBrand) add(f.subdomainTrick ? 'SUBDOMAIN_TRICK' : 'LOOKALIKE_DOMAIN', w, true);
+if(f.punycode) add('LOOKALIKE_DOMAIN', w, true);
 if(f.isIp) add('IP_ADDRESS_URL', .50);
 if(f.keywordStuffing) add('KEYWORD_STUFFING', .30);
 if(f.suspiciousTld) add('SUSPICIOUS_TLD', .25);
-if(f.isShortener) add('URL_SHORTENER', .20);
+if(f.isShortener) add('URL_SHORTENER', .45);
 if(!f.https) add('NOT_HTTPS', .15);
 });
 return signals;
@@ -2484,7 +2484,7 @@ signals.push({ code:code, category:'transaction', weight:weight, critical:!!crit
 }
 if(input.purpose === 'fee_for_job_or_visa') add('RISKY_PURPOSE_FEE', .80, true);
 if(input.purpose === 'fee_to_claim_prize_or_loan') add('RISKY_PURPOSE_FEE', .80, true);
-if(input.purpose === 'someone_met_online') add('RISKY_PURPOSE_UNMET', .50);
+if(input.purpose === 'someone_met_online') add('RISKY_PURPOSE_UNMET', .60);
 var amounts = ctx.history.map(function(h){ return h.amount; })
 .filter(function(a){ return a > 0; }).sort(function(a,b){ return a-b; });
 if(amounts.length >= 3){
@@ -2516,18 +2516,18 @@ var links = unique.filter(function(s){ return s.category === 'link'; });
 var critical = unique.some(function(s){ return s.critical; });
 var clean = !links.some(function(s){ return s.weight >= .2 && s.code !== 'NOT_HTTPS'; });
 if(links.length && clean && !critical){
-score = Math.min(score, RULES.allowlistCap);
-mitigators.push('ALLOWLISTED_LINKS');
+score = Math.min(score, RULES.allowlistCap); mitigators.push('ALLOWLISTED_LINKS');
 }
+if(unique.length && !links.length && unique.every(function(s){ return s.code === 'BRAND_IMPERSONATION'; })){ score = Math.min(score, RULES.mentionOnlyCap); mitigators.push('BRAND_MENTION_ONLY'); }
 var cats = {}; unique.forEach(function(s){ cats[s.category] = 1; });
-var corroborationMet = critical || Object.keys(cats).length >= 2;
+var heavy = unique.filter(function(s){ return s.weight >= RULES.corroborationWeight; }).length, corroborationMet = critical || Object.keys(cats).length >= 2 || (heavy >= 2 && unique.length >= RULES.corroborationCount);
 if(score >= RULES.high && !corroborationMet){
 score = RULES.corroborationCap;
 mitigators.push('CORROBORATION_NOT_MET');
 }
+var score = Math.round(score*1000)/1000;
 var verdict = score >= RULES.high ? 'high_risk' : score >= RULES.suspicious ? 'suspicious' : 'looks_genuine';
-return { score:Math.round(score*1000)/1000, verdict:verdict, corroborationMet:corroborationMet,
-mitigators:mitigators, unique:unique };
+return { score:score, verdict:verdict, corroborationMet:corroborationMet, mitigators:mitigators, unique:unique };
 }
 function pickReasons(signals, limit){
 var seen = {}, out = [];

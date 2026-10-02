@@ -1,0 +1,55 @@
+{
+  "name": "Ntiyiso — Scam Shield",
+  "short_name": "Ntiyiso",
+  "description": "Paste a message, a link or a payment before you act, and get a plain-language warning with the reason and what to do next.",
+  "id": "/app/check",
+  "start_url": "/app/check",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0e121c",
+  "lang": "en-ZA",
+  "dir": "ltr",
+  "categories": ["finance", "security", "utilities"],
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Check a message",
+      "short_name": "Check",
+      "url": "/app/check",
+      "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Check a payment",
+      "short_name": "Payment",
+      "url": "/app/send",
+      "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Scam library",
+      "short_name": "Library",
+      "url": "/app/library",
+      "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

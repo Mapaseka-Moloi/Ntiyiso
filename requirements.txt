@@ -1,5 +1,26 @@
-fastapi
-uvicorn
-pydantic
-python-dotenv
-requests
+# Ntiyiso runs with nothing installed. The site is static HTML, CSS and
+# JavaScript; the API's default server is standard library only.
+#
+#   python -m backend --standalone
+#
+# This file is only for the FastAPI server, which is documented at /docs and
+# handles a few dozen more requests per second:
+#
+#   pip install -r requirements.txt
+#   python -m backend
+#
+# Both servers serve the same routes, bodies and errors. tools/check_all.py runs
+# the same contract check against each, so they cannot quietly diverge.
+#
+# Lower bounds rather than exact pins: this has to run on a laptop, a judge's
+# laptop and a Raspberry Pi, and an exact pin is what most often breaks one of
+# those three.
+#
+# There is deliberately no `requests` and no `python-dotenv` here. Nothing in the
+# API fetches anything - that is a privacy property, not an oversight, see
+# docs/BACKEND.md section 9 - so an HTTP client would be dead weight, and the
+# configuration is read from the environment directly.
+
+fastapi>=0.110
+uvicorn>=0.27
+pydantic>=2.6

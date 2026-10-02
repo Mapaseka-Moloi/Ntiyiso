@@ -150,6 +150,27 @@ try {
     return r.result.value;
   };
 
+  /* Wait for a condition instead of hoping a fixed sleep was long enough.
+   *
+   * This check runs last, on a machine already driving four other browser
+   * scripts and two API servers, and every page now also registers a service
+   * worker on load. A fixed `sleep(1100)` is a race that happens to win on an
+   * idle laptop and loses under load - and when it loses, the click below lands
+   * on an unwired button and the check reports "the role picker is not wired",
+   * which blames the app for the test being impatient. */
+  const waitFor = async (expr, timeoutMs = 8000) => {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      try { if (await evaluate(expr)) return true; } catch { /* mid-navigation */ }
+      if (Date.now() > deadline) return false;
+      await sleep(100);
+    }
+  };
+
+  /* How long a page has to be interactive. Generous, because the cost of waiting
+   * is a second and the cost of guessing wrong is a failure nobody can trust. */
+  const READY = `document.readyState === 'complete'`;
+
   await send('Runtime.enable');
   await send('Page.enable');
   await send('Emulation.setDeviceMetricsOverride',
@@ -168,40 +189,55 @@ try {
       return true;
     })()`).catch(() => { /* first document has no origin yet */ });
     await send('Page.navigate', { url: BASE + route });
-    await sleep(1100);
+    await waitFor(READY, 15000);
 
     if (role) {
-      const picked = await evaluate(`
-        (() => {
-          const btn = document.querySelector('#rolePicker [data-role="' + ${JSON.stringify(role)} + '"]');
-          if (!btn) return false;
-          btn.click();
-          return true;
-        })()
-      `);
-      if (!picked) {
+      /* The button has to exist before it can be clicked, and it only exists
+       * once the page's own script has run. */
+      const button = `#rolePicker [data-role="${role}"]`;
+      if (!(await waitFor(`!!document.querySelector(${JSON.stringify(button)})`, 8000))) {
         failures++;
         console.log(`FAIL ${route} (as ${seedName}, role ${role})  no such role button`);
         continue;
       }
-      await sleep(450);
+
+      /* Click, then wait for step two to open. If it has not opened yet the
+       * click may have raced the wiring, so click again rather than reporting a
+       * failure for a page that is simply not ready. */
+      const clickRole = `(() => {
+        const btn = document.querySelector(${JSON.stringify(button)});
+        if (!btn) return false;
+        btn.click();
+        return true;
+      })()`;
+      const stepTwoOpen = `(() => {
+        const s = document.getElementById('authStep2');
+        if (!s) return false;
+        const r = s.getBoundingClientRect();
+        return getComputedStyle(s).display !== 'none' && r.width > 2 && r.height > 2;
+      })()`;
+
+      await evaluate(clickRole);
+      let advanced = await waitFor(stepTwoOpen, 2000);
+      if (!advanced) {
+        await evaluate(clickRole);
+        advanced = await waitFor(stepTwoOpen, 4000);
+      }
 
       /* The choice has to have done something. If the page script died before it
        * wired the picker, step two never opens, and the form stays hidden behind
        * an ancestor - which reads as correct to the audit below. Asserting the
        * advance is what stops a broken script passing as a tidy page. */
-      const advanced = await evaluate(`
-        (() => {
+      if (!advanced) {
+        const why = await evaluate(`(() => {
           const s = document.getElementById('authStep2');
           if (!s) return 'missing';
-          const r = s.getBoundingClientRect();
-          const shown = getComputedStyle(s).display !== 'none' && r.width > 2 && r.height > 2;
-          return shown ? 'ok' : 'still hidden - the role picker is not wired';
-        })()
-      `);
-      if (advanced !== 'ok') {
+          return getComputedStyle(s).display === 'none'
+            ? 'still hidden - the role picker is not wired'
+            : 'present but has no size';
+        })()`);
         failures++;
-        console.log(`FAIL ${route} (as ${seedName}, role ${role})  ${advanced}`);
+        console.log(`FAIL ${route} (as ${seedName}, role ${role})  ${why}`);
         continue;
       }
     }

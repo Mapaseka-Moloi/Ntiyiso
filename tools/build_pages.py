@@ -60,6 +60,12 @@ def page(title, description, styles, scripts, body, html_attrs=""):
 <meta name="color-scheme" content="light" />
 <title>%(title)s</title>
 <link rel="icon" href="%(logo)s" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#0e121c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Ntiyiso" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="apple-touch-icon" href="/assets/icon-192.png" />
 %(links)s
 </head>
 <body>

@@ -350,6 +350,25 @@ NT.cust = {
   wireAuthForms:wireAuthForms, wireProviderBlock:wireProviderBlock,
   enterApp:enterApp
 };
+
+/* ══ offline shell ═══════════════════════════════════════════════════════
+   Registers /sw.js so the app opens with no signal. Only the shell is cached —
+   verdicts are never cached, because a remembered "this looks fine" is worse
+   than no answer. When the network is gone, apiRequest() fails with
+   NETWORK_UNAVAILABLE and checkMessage() runs the same engine locally, so the
+   warning a customer reads is a fresh calculation rather than a stale one.
+
+   Failure is deliberately silent and unlogged: a browser that does not support
+   service workers, a file:// page, or an insecure origin are all ordinary
+   states for a prototype, not errors worth putting in front of a user. */
+function registerServiceWorker(){
+  if(!('serviceWorker' in navigator)) return;
+  if(location.protocol === 'file:') return;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js', { scope:'/' }).catch(function(){});
+  });
+}
+registerServiceWorker();
 })(window);
 '''
 

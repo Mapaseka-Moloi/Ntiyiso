@@ -17,13 +17,55 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "build" / "monolith.html"
 OUT = ROOT / "build" / "extracted"
 
-# 1-based inclusive line ranges, verified against the source.
+# 1-based inclusive line ranges into the monolith.
+#
+# These numbers drift the moment anything above them in the file changes, and
+# they used to drift *silently*: a stale end line quietly truncated the last few
+# lines of the customer bundle, and the next patch in tools/build_customer_js.py
+# failed with "patch target not found" long after the real cause. So every block
+# carries an anchor instead. The anchor is searched for, and the recorded number
+# is only a fallback plus a sanity check — if the anchor cannot be found, or the
+# anchored slice does not contain the required sentinels, extraction stops.
+#
+#   start  regex that must match the first line of the block
+#   end    regex that must match the last line of the block
+#   must   substrings that must appear somewhere in the slice
 BLOCKS = {
-    "shell.css": (51, 60),
-    "customer.css": (67, 464),
-    "desk.css": (471, 1111),
-    "customer.js": (2053, 4376),
-    "desk.js": (4383, 6171),
+    "shell.css": {
+        "lines": (51, 60),
+        "start": r"^/\*.*GLOBAL SHELL",
+        "end": r"^\}$",
+        "must": ["box-sizing:border-box"],
+    },
+    "customer.css": {
+        "lines": (67, 464),
+        "start": r"^@scope \(#customerRoot\) \{",
+        "end": r"^\}$",
+        "must": ["--brand"],
+    },
+    "desk.css": {
+        "lines": (471, 1111),
+        "start": r"^@scope \(#deskRoot\) \{",
+        "end": r"^\}$",
+        "must": ["#deskRoot", ".session-chip"],
+    },
+    "customer.js": {
+        "lines": (2053, 4376),
+        "start": r"^\"use strict\";$",
+        "end": r"^\}\)\(\);$",
+        "must": [
+            "var DEFAULT_API = 'http://localhost:8000/api/v1';",
+            "window.__ntiyisoCustomer",
+            "$('staffCodeBlock')",
+            "function fuse(",
+        ],
+    },
+    "desk.js": {
+        "lines": (4383, 6171),
+        "start": r"^\"use strict\";$",
+        "end": r"^\}\)\(\);$",
+        "must": ["__ntiyisoDesk", "handOff(", "DESK_ROOT"],
+    },
 }
 
 # The markup the page builder reuses. Each slice is cut at a boundary that still
@@ -71,12 +113,68 @@ MARKUP = {
 }
 
 
+def resolve_blocks(lines) -> dict:
+    """Resolve every block's start, then bound each end by the next block's start.
+
+    A block ends where the next one begins, so the end anchor is only ever
+    searched inside that window. Searching to the end of the file instead would
+    let the customer bundle swallow the desk bundle, because both close with the
+    same `})();`.
+    """
+    import re
+
+    names = list(BLOCKS)
+    starts = {}
+    for name in names:
+        spec = BLOCKS[name]
+        pattern = re.compile(spec["start"])
+        found = None
+        for index in range(spec["lines"][0] - 1, len(lines)):
+            if pattern.match(lines[index].rstrip("\n")):
+                found = index
+                break
+        if found is None:
+            sys.exit(f"{name}: could not find the start anchor {spec['start']!r}")
+        starts[name] = found
+
+    # Blocks must resolve in file order, otherwise "the next block" is ambiguous.
+    ordered = sorted(names, key=lambda n: starts[n])
+    if ordered != names:
+        sys.exit(
+            "BLOCKS are listed out of file order: "
+            + ", ".join(f"{n}@{starts[n] + 1}" for n in ordered)
+        )
+
+    resolved = {}
+    for position, name in enumerate(names):
+        spec = BLOCKS[name]
+        pattern = re.compile(spec["end"])
+        stop = starts[names[position + 1]] if position + 1 < len(names) else len(lines)
+        end = None
+        for index in range(stop - 1, starts[name], -1):
+            if pattern.match(lines[index].rstrip("\n")):
+                end = index
+                break
+        if end is None:
+            sys.exit(f"{name}: could not find the end anchor {spec['end']!r}")
+
+        chunk = "".join(lines[starts[name] : end + 1])
+        missing = [needle for needle in spec["must"] if needle not in chunk]
+        if missing:
+            sys.exit(
+                f"{name}: anchored slice {starts[name] + 1}-{end + 1} is missing "
+                + ", ".join(repr(m) for m in missing)
+                + " — the anchor matched the wrong place"
+            )
+        resolved[name] = (starts[name] + 1, end + 1, chunk)
+    return resolved
+
+
 def main() -> int:
     lines = SRC.read_text(encoding="utf-8").splitlines(keepends=True)
     OUT.mkdir(parents=True, exist_ok=True)
 
-    for name, (start, end) in BLOCKS.items():
-        chunk = "".join(lines[start - 1 : end])
+    for name, (start, end, chunk) in resolve_blocks(lines).items():
         (OUT / name).write_text(chunk, encoding="utf-8")
         print(f"{name:>14}  lines {start:>5}-{end:<5}  {len(chunk):>7,} bytes")
 
